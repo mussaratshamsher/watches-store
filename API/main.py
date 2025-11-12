@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
 
 class Product(BaseModel):
     id: int
@@ -12,16 +13,16 @@ class Product(BaseModel):
     availability: bool
     details: str
 
-class Box(BaseModel):
-    id: int
-    image: str
-    name: str
-    price: float
-    tags: List[str]
-    availability: bool
-    details: str
-
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Mount the 'static' directory to serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -80,32 +81,38 @@ products = {
 
 #Sample box data
 boxes ={
-    1: Box(id=1,image="/static/images/box1.jpg", name="Classic Chronograph Box", price=270.00, tags=["classic", "chronograph", "leather"], availability=True,
+    1: Product(id=1,image="/static/images/img1.jpg", name="Classic Chronograph Box", price=270.00, tags=["classic", "chronograph", "leather"], availability=True,
         details="Includes the Classic Chronograph watch, a leather strap, and a stainless steel case. Comes with a stylish box and warranty."), 
-    2: Box(id=2,image="/static/images/box2.jpg", name="Sporty Digital Box", price=170.00, tags=["sporty", "digital", "rubber"], availability=True,
+    2: Product(id=2,image="/static/images/img2.jpg", name="Sporty Digital Box", price=170.00, tags=["sporty", "digital", "rubber"], availability=True,
         details="Includes the Sporty Digital watch, a rubber strap, and multiple functions like stopwatch and alarm. Comes with a sporty box and warranty."),
-    3: Box(id=3,image="/static/images/box3.jpg", name="Elegant Dress Watch Box", price=320.00, tags=["elegant", "dress", "metal"], availability=False,
+    3: Product(id=3,image="/static/images/img3.jpg", name="Elegant Dress Watch Box", price=320.00, tags=["elegant", "dress", "metal"], availability=False,
         details="Includes the Elegant Dress Watch, a metal bracelet, and minimalist design. Comes with an elegant box and warranty."),
-    4: Box(id=4,image="/static/images/box4.jpg", name="Vintage Mechanical Box", price=420.00, tags=["vintage", "mechanical", "leather"], availability=True,
+    4: Product(id=4,image="/static/images/img4.jpg", name="Vintage Mechanical Box", price=420.00, tags=["vintage", "mechanical", "leather"], availability=True,
         details="Includes the Vintage Mechanical watch, a leather strap, and intricate detailing. Comes with a vintage-style box and warranty."),   
 } 
+
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the Watches Store API"}
 
 # API Endpoint --1
 # for products
 @app.get("/products", response_model=List[Product])
 async def get_products():
     return list(products.values())
+
 # Get product by ID
 @app.get("/products/{id}", response_model=Product)
 async def get_product(id: int):
-    return boxes[id]
+    return products[id]
 
 # API Endpoint --2
 #for boxes
-@app.get("/boxes", response_model=List[Box])
+@app.get("/boxes", response_model=List[Product])
 async def get_boxes():
     return list(boxes.values())
+
 # Get box by ID
-@app.get("/boxes/{id}", response_model=Box)
+@app.get("/boxes/{id}", response_model=Product)
 async def get_box(id: int):
     return boxes[id]
