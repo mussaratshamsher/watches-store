@@ -1,0 +1,17 @@
+"use client";
+
+import { useEffect } from "react";
+import AOS from "aos";
+
+import "aos/dist/aos.css";
+
+export const AOSInit = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: false, // whether animation should happen only once - while scrolling down
+    });
+  }, []);
+
+  return null;
+};
